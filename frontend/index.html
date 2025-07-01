@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Sourcing Agent</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 48px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            letter-spacing: -0.025em;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 32px;
+            box-shadow: 0 20px 40px rgba(102,126,234,0.1), 0 4px 8px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 32px 64px rgba(102,126,234,0.15), 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #1a202c;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            color: #667eea;
+            font-size: 1.5rem;
+        }
+
+        .job-input {
+            width: 100%;
+            max-width: 800px;
+            min-height: 140px;
+            padding: 24px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .job-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+
+        .profile-count-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 24px 0 16px 0;
+            gap: 12px;
+        }
+
+        .profile-count-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .profile-count-select {
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            font-size: 1rem;
+            font-weight: 500;
+            background: white;
+            color: #2d3748;
+            outline: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .profile-count-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 32px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .candidate-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 20px;
+            padding: 28px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .candidate-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(102,126,234,0.15);
+            border-color: #cbd5e0;
+        }
+
+        .candidate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            gap: 16px;
+        }
+
+        .candidate-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .candidate-name i {
+            color: #667eea;
+        }
+
+        .candidate-headline {
+            color: #4a5568;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .score-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .candidate-actions {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .view-profile-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .view-profile-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .breakdown-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f1f5f9;
+        }
+
+        .breakdown-label {
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .breakdown-score {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .outreach-section {
+            margin-top: 32px;
+        }
+
+        .outreach-card {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 20px;
+            border: 1px solid #d1fae5;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .outreach-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .outreach-candidate {
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .outreach-candidate i {
+            color: #10b981;
+        }
+
+        .outreach-message {
+            color: #4a5568;
+            line-height: 1.7;
+            font-size: 0.95rem;
+            margin-bottom: 16px;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .copy-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-1px);
+        }
+
+        .error {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            color: #dc2626;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid #fecaca;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .success {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            color: #059669;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid #a7f3d0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .header h1 {
+                font-size: 2.25rem;
+            }
+            
+            .card {
+                padding: 24px;
+            }
+            
+            .candidates-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .breakdown-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .button-row {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-search"></i> LinkedIn Sourcing Agent</h1>
+            <p>Find, score, and reach out to the best candidates for your role</p>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">
+                <i class="fas fa-file-alt"></i> Job Description
+            </h2>
+            <textarea 
+                id="jobDescription" 
+                class="job-input" 
+                placeholder="Enter your job description here...&#10;&#10;Example: We're recruiting for a Software Engineer, ML Research role at Windsurf (the company behind Codeium) - a Forbes AI 50 company building AI-powered developer tools. They're looking for someone to train LLMs for code generation, with $140-300k + equity in Mountain View."
+            ></textarea>
+            <div class="profile-count-row">
+                <label for="profileCount" class="profile-count-label">Number of profiles to search:</label>
+                <select id="profileCount" class="profile-count-select">
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
+                    <option value="30">30</option>
+                </select>
+            </div>
+            <div class="button-row">
+                <button id="runPipeline" class="btn">
+                    <i class="fas fa-rocket"></i> Run Full Pipeline
+                </button>
+                <button id="searchOnly" class="btn">
+                    <i class="fas fa-search"></i> Search Only
+                </button>
+                <button id="fastSearch" class="btn">
+                    <i class="fas fa-bolt"></i> Fast Search
+                </button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing your request...</p>
+        </div>
+
+        <div class="results-section" id="results">
+            <div class="card">
+                <h2 class="section-title">
+                    <i class="fas fa-users"></i> Candidates Found
+                    <span id="candidateCount"></span>
+                </h2>
+                <div id="candidatesGrid" class="candidates-grid"></div>
+            </div>
+
+            <div class="card">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-bar"></i> Scored Candidates
+                </h2>
+                <div id="scoredCandidatesGrid" class="candidates-grid"></div>
+            </div>
+
+            <div class="card outreach-section">
+                <h2 class="section-title">
+                    <i class="fas fa-envelope"></i> Outreach Messages
+                </h2>
+                <div id="outreachMessages"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        // Elements
+        const jobDescription = document.getElementById('jobDescription');
+        const runPipeline = document.getElementById('runPipeline');
+        const searchOnly = document.getElementById('searchOnly');
+        const fastSearch = document.getElementById('fastSearch');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const candidatesGrid = document.getElementById('candidatesGrid');
+        const scoredCandidatesGrid = document.getElementById('scoredCandidatesGrid');
+        const outreachMessages = document.getElementById('outreachMessages');
+        const candidateCount = document.getElementById('candidateCount');
+
+        // Event listeners
+        runPipeline.addEventListener('click', () => runFullPipeline());
+        searchOnly.addEventListener('click', () => searchCandidates());
+        fastSearch.addEventListener('click', () => fastSearchCandidates());
+
+        async function runFullPipeline() {
+            const description = jobDescription.value.trim();
+            const profileCount = parseInt(document.getElementById('profileCount').value);
+            if (!description) {
+                showError('Please enter a job description');
+                return;
+            }
+
+            showLoading();
+            try {
+                const response = await fetch(`${API_BASE}/full-pipeline`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ description, profile_count: profileCount })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+                showSuccess('Pipeline completed successfully!');
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function searchCandidates() {
+            const description = jobDescription.value.trim();
+            const profileCount = parseInt(document.getElementById('profileCount').value);
+            if (!description) {
+                showError('Please enter a job description');
+                return;
+            }
+
+            showLoading();
+            try {
+                const response = await fetch(`${API_BASE}/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ description, profile_count: profileCount })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const candidates = await response.json();
+                displayCandidates(candidates);
+                results.classList.add('show');
+                showSuccess(`Found ${candidates.length} candidates!`);
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function fastSearchCandidates() {
+            const description = jobDescription.value.trim();
+            const profileCount = parseInt(document.getElementById('profileCount').value);
+            if (!description) {
+                showError('Please enter a job description');
+                return;
+            }
+
+            showLoading();
+            try {
+                const response = await fetch(`${API_BASE}/search-fast`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ description, profile_count: profileCount })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const candidates = await response.json();
+                displayCandidates(candidates);
+                results.classList.add('show');
+                showSuccess(`Found ${candidates.length} candidates!`);
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayResults(data) {
+            displayCandidates(data.candidates);
+            displayScoredCandidates(data.scored_candidates);
+            displayOutreachMessages(data.outreach_messages);
+            results.classList.add('show');
+        }
+
+        function clearResults() {
+            candidatesGrid.innerHTML = '';
+            scoredCandidatesGrid.innerHTML = '';
+            outreachMessages.innerHTML = '';
+            candidateCount.textContent = '';
+        }
+
+        function displayCandidates(candidates) {
+            candidateCount.textContent = ` (${candidates.length})`;
+            candidatesGrid.innerHTML = candidates.map(candidate => `
+                <div class="candidate-card">
+                    <div class="candidate-header">
+                        <div class="candidate-name">
+                            <i class="fas fa-user"></i> ${candidate.name}
+                        </div>
+                    </div>
+                    <div class="candidate-headline">${candidate.headline}</div>
+                    <div class="candidate-actions">
+                        <a href="${candidate.linkedin_url}" target="_blank" class="view-profile-btn">
+                            <i class="fab fa-linkedin"></i> View Profile
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayScoredCandidates(scoredCandidates) {
+            scoredCandidatesGrid.innerHTML = scoredCandidates.map(candidate => `
+                <div class="candidate-card">
+                    <div class="candidate-header">
+                        <div class="candidate-name">
+                            <i class="fas fa-user"></i> ${candidate.name}
+                        </div>
+                        <div class="score-badge">Score: ${candidate.score}/10</div>
+                    </div>
+                    <div class="candidate-headline">${candidate.headline}</div>
+                    <div class="candidate-actions">
+                        <a href="${candidate.linkedin_url}" target="_blank" class="view-profile-btn">
+                            <i class="fab fa-linkedin"></i> View Profile
+                        </a>
+                    </div>
+                    <div class="breakdown-grid">
+                        ${Object.entries(candidate.breakdown).map(([key, value]) => `
+                            <div class="breakdown-item">
+                                <div class="breakdown-label">${key.charAt(0).toUpperCase() + key.slice(1)}</div>
+                                <div class="breakdown-score">${value}/10</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayOutreachMessages(messages) {
+            outreachMessages.innerHTML = messages.map((message, idx) => `
+                <div class="outreach-card">
+                    <div class="outreach-candidate">
+                        <i class="fas fa-user"></i> ${message.candidate}
+                    </div>
+                    <div class="outreach-message" id="outreach-message-${idx}">${message.message}</div>
+                    <button class="btn copy-btn" data-idx="${idx}"><i class="fas fa-copy"></i> Copy</button>
+                </div>
+            `).join('');
+
+            // Add event listeners for copy buttons
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const idx = this.getAttribute('data-idx');
+                    const msg = document.getElementById(`outreach-message-${idx}`).innerText;
+                    navigator.clipboard.writeText(msg).then(() => {
+                        showSuccess('Message copied to clipboard!');
+                    });
+                });
+            });
+        }
+
+        function showLoading() {
+            loading.style.display = 'block';
+            results.classList.remove('show');
+            clearResults();
+            runPipeline.disabled = true;
+            searchOnly.disabled = true;
+            fastSearch.disabled = true;
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+            runPipeline.disabled = false;
+            searchOnly.disabled = false;
+            fastSearch.disabled = false;
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            document.querySelector('.card').appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            document.querySelector('.card').appendChild(successDiv);
+            setTimeout(() => successDiv.remove(), 5000);
+        }
+    </script>
+</body>
+</html> 
