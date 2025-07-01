@@ -1,7 +1,8 @@
 # 🚀 LinkedIn Sourcing Agent
 
 An intelligent AI-powered LinkedIn candidate sourcing, scoring, and outreach generation system built with Python, FastAPI, and Groq API. This project automates the entire recruitment pipeline from finding candidates to generating personalized outreach messages.
-
+## Demo Video
+https://www.loom.com/share/10203068087242bba62e1a873da0aee9?sid=0619fcd6-34bb-4fce-a5c6-2af18e67f41f
 ## ✨ Features
 
 ### 🔍 **Smart Candidate Search**
