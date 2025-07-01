@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "start_enhanced_server.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "includeFiles": [
+          "app/**",
+          "../frontend/**"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "start_enhanced_server.py"
+    },
+    {
+      "src": "/frontend",
+      "dest": "start_enhanced_server.py"
+    },
+    {
+      "src": "/(search|score|score-fast|outreach|full-pipeline|health|search-fast)",
+      "methods": ["POST", "GET"],
+      "dest": "start_enhanced_server.py"
+    },
+    {
+      "src": "/",
+      "dest": "start_enhanced_server.py"
+    }
+  ],
+  "env": {
+    "PYTHONUNBUFFERED": "1",
+    "PYTHONPATH": "./"
+  }
+}
