@@ -519,7 +519,10 @@
     </div>
 
     <script>
-        const API_BASE = '';
+        // Use empty string for base path
+const API_BASE = '';
+fetch(`${API_BASE}/search`, { method: 'POST', ... });
+
         
         // Elements
         const jobDescription = document.getElementById('jobDescription');
