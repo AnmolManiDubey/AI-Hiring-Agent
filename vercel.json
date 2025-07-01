@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "name": "linkedin-sourcing-agent-backend",
+  "builds": [
+    {
+      "src": "enhanced_main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "enhanced_main.py"
+    }
+  ],
+  "functions": {
+    "enhanced_main.py": {
+      "runtime": "python3.9"
+    }
+  },
+  "env": {
+    "PYTHONPATH": "."
+  },
+  "github": {
+    "silent": true
+  },
+  "regions": ["iad1"]
+}
