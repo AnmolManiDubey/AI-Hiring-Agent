@@ -11,8 +11,8 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from groq_agent import EnhancedLinkedInSourcingAgent
-from enhanced_scoring import score_candidates_enhanced, score_candidates_fast
-from enhanced_outreach import generate_outreach_enhanced
+from app.core.enhanced_scoring import score_candidates_enhanced, score_candidates_fast
+from app.core.enhanced_outreach import generate_outreach_enhanced
 
 app = FastAPI(title="Enhanced LinkedIn Sourcing Agent API", version="2.0.0")
 
@@ -26,8 +26,9 @@ app.add_middleware(
 )
 
 # Mount static files
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend'))
 
+app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 # Initialize the enhanced agent
 agent = EnhancedLinkedInSourcingAgent()
 
@@ -75,7 +76,9 @@ async def root():
 @app.get("/frontend")
 async def serve_frontend():
     """Serve the frontend HTML file"""
-    return FileResponse("frontend/index.html")
+    index_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'index.html'))
+    return FileResponse(index_path)
+
 
 @app.post("/search", response_model=List[CandidateResponse])
 async def search_candidates(request: Request):
