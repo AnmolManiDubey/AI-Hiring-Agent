@@ -1,4 +1,4 @@
-from agent import LinkedInSourcingAgent
+from backend.app.core.agent import LinkedInSourcingAgent
 from scoring import score_candidates
 from outreach import generate_outreach
 
