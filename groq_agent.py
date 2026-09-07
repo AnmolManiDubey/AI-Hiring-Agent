@@ -30,7 +30,7 @@ class EnhancedLinkedInSourcingAgent:
             self.use_groq = False
 
     def extract_search_terms_with_ai(self, job_description):
-        """Use Groq/Llama to intelligently extract search terms from job description"""
+        """Use Groq/OSS to intelligently extract search terms from job description"""
         if not self.use_groq:
             return self._extract_search_terms_basic(job_description)
         
@@ -46,7 +46,7 @@ class EnhancedLinkedInSourcingAgent:
         
         try:
             response = self.groq_client.chat.completions.create(
-                model="llama3-8b-8192",
+                model="openai/gpt-oss-20b",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
                 max_tokens=200
